@@ -1,5 +1,4 @@
-echo -n "Enter a number: "
-read num
+read -p "Enter a number: " num
 
 # While loop. Good old i for interating
 i=2

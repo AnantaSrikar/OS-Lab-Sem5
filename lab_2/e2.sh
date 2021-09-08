@@ -1,8 +1,6 @@
-echo -n "Enter 1st num: "
-read num1
+read -p "Enter 1st num: " num1
 
-echo -n "Enter 2nd num: "
-read num2
+read -p "Enter 2nd num: " num2
 
 # Swap them
 num1=$(($num1 + $num2))
