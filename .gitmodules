@@ -1,0 +1,3 @@
+[submodule "lab_5"]
+	path = lab_5
+	url = git@github.com:AnantaSrikar/HEFT-OS-Lab.git
