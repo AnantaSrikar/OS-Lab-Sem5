@@ -11,7 +11,7 @@ int main()
 {
 	// Funtion prototypes
 	int **getMatrix(int, int);
-	void permute(int**, int**, int*, int, int, int*, int, int);
+	void sortedPermutations(int**, int**, int*, int, int, int*);
 
 	FILE *inFPtr = NULL;
 
@@ -89,11 +89,11 @@ int main()
 	}
 
 	// Making a temporary array
-	int a[n];
+	int nums[n];
 	for(int i = 0; i < n; i++)
-		a[i] = i;
+		nums[i] = i;
 
-	permute(max, alloc, resource, n, m, a, 0, n - 1);
+	sortedPermutations(max, alloc, resource, n, m, nums);
 
 	return(0);
 }
@@ -106,13 +106,6 @@ int** getMatrix(int n, int m)
 		matrix[i] = (int*)malloc(m * sizeof(int));
 
 	return matrix;
-}
-
-void delMatrix(int **matrix, int n)
-{
-	for(int i = 0; i < n; i++)
-		free(matrix[i]);
-	free(matrix);
 }
 
 // To check if the given order of execution is safe or not
@@ -145,6 +138,14 @@ int checkSafety(int **max, int **init_alloc, int *resource, int *order, int n, i
 	return 1;
 }
 
+// Below functions are used to generate permutations of numbers in a lexicographical (dictionary) order
+
+// Following function is needed for library function qsort().
+int compare (const void *a, const void * b)
+{
+	return(*(int *)a - *(int *)b);
+}
+
 // Function to swap integer values at a given memory location
 void swap(int *x, int *y)
 {
@@ -154,27 +155,64 @@ void swap(int *x, int *y)
 	*y = temp;
 }
 
-// Bad time complexity ;-;
-void permute(int **max, int **alloc, int *resources, int n, int m, int *a, int l, int r)
+// This function finds the index of the smallest number which is greater than 'first' and is present in str[l..h]
+int findCeil(int nums[], int first, int l, int h)
 {
-	int i;
-	if (l == r)
+	// initialize index of ceiling element
+	int ceilIndex = l;
+
+	// Now iterate through rest of the elements and find the smallest number greater than 'first'
+	for (int i = l+1; i <= h; i++)
+	if (nums[i] > first && nums[i] < nums[ceilIndex])
+			ceilIndex = i;
+
+	return ceilIndex;
+}
+
+// Print all permutations of nums in sorted order
+void sortedPermutations(int **max, int **alloc, int *resource, int n, int m, int *nums)
+{
+	int size = n;
+
+	// Sort the numbers in increasing order
+	qsort(nums, size, sizeof(nums[0]), compare);
+
+	// Print permutations one by one
+	int isFinished = 0;
+	while(!isFinished)
 	{
-		if(checkSafety(max, alloc, resources, a, n, m))
+		// if the permutation is a safe execution, save it
+		if(checkSafety(max, alloc, resource, nums, n, m))
 		{
-			for(int j = 0; j < 5; j++)
-				printf("%d", a[j]);
+			printf("Safe ig: ");
+			for(int i = 0; i < size; i++)
+				printf ("%d ", nums[i]);
 			printf("\n");
 		}
-	}
 
-	else
-	{
-		for (i = l; i <= r; i++)
+		// Find the rightmost number which is smaller than its next
+		// number. Let us call it 'first char'
+		int i;
+		for (i = size - 2; i >= 0; --i)
+			if (nums[i] < nums[i+1])
+				break;
+
+		// If there is no such number, all are sorted in decreasing order,
+		// means we just printed the last permutation and we are done.
+		if(i == -1)
+			isFinished = 1;
+		
+		else
 		{
-			swap((a+l), (a+i));
-			permute(max, alloc, resources, n, m, a, l+1, r);
-			swap((a+l), (a+i));	//backtrack
+			// Find the ceil of 'first number' in right of first number.
+			// Ceil of a number is the smallest number greater than it
+			int ceilIndex = findCeil(nums, nums[i], i + 1, size - 1);
+
+			// Swap first and second numbers
+			swap(&nums[i], &nums[ceilIndex]);
+
+			// Sort the string on right of 'first number'
+			qsort(nums + i + 1, size - i - 1, sizeof(nums[0]), compare);
 		}
 	}
 }
