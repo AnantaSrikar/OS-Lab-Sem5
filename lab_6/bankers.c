@@ -11,7 +11,7 @@ int main()
 {
 	// Funtion prototypes
 	int **getMatrix(int, int);
-
+	void permute(int**, int**, int*, int, int, int*, int, int);
 
 	FILE *inFPtr = NULL;
 
@@ -23,7 +23,7 @@ int main()
 		return -1;
 	}
 
-	int m, n;
+	int m, n;	// m : num of resources, n: num of procs
 
 	fscanf(inFPtr, "%d %d", &m, &n);
 
@@ -33,11 +33,12 @@ int main()
 	int **alloc = getMatrix(n, m);
 	int **max = getMatrix(n, m);
 	int **need = getMatrix(n, m);
+	int *resource = (int*)malloc(m * sizeof(int));
 	int *avail = (int*)malloc(m * sizeof(int));
 
 	// avail
 	for(int i = 0; i < m; i++)
-		fscanf(inFPtr, "%d ", &avail[i]);
+		fscanf(inFPtr, "%d ", &resource[i]);
 
 	// max
 	for(int i = 0; i < n; i++)
@@ -56,9 +57,9 @@ int main()
 
 	// Printing them:
 
-	printf("avail:\n");
+	printf("resource:\n");
 	for(int i = 0; i < m; i++)
-		printf("%d ", avail[i]);
+		printf("%d ", resource[i]);
 
 	printf("\n\nmax:\n");
 	for(int i = 0; i < n; i++)
@@ -87,6 +88,13 @@ int main()
 		printf("\n");
 	}
 
+	// Making a temporary array
+	int a[n];
+	for(int i = 0; i < n; i++)
+		a[n] = i;
+
+	permute(max, alloc, resource, n, m, a, 0, n - 1);
+
 	return(0);
 }
 
@@ -98,4 +106,73 @@ int** getMatrix(int n, int m)
 		matrix[i] = (int*)malloc(m * sizeof(int));
 
 	return matrix;
+}
+
+void delMatrix(int **matrix, int n)
+{
+	for(int i = 0; i < n; i++)
+		free(matrix[i]);
+	free(matrix);
+}
+
+// To check if the given order of execution is safe or not
+int checkSafety(int **max, int **init_alloc, int *resource, int *order, int n, int m)
+{
+	int cur_alloc[n][m];
+	int avail[m];
+
+	// Copying initial allocation into temp matrix
+	for(int i = 0; i < n; i++)
+		for(int j = 0; j < m; j++)
+			cur_alloc[i][j] = init_alloc[i][j];
+
+	// Calculating inital availability
+	for(int i = 0; i < n; i++)
+		for(int j = 0; j < m; j++)
+			avail[j] = max[i][j] - init_alloc[i][j];
+
+	// Running the safety check for the given order
+	for(int i = 0; i < n; i++)
+		for(int j = 0; j < m; j++)
+			if(cur_alloc[order[i]][j] + avail[j] >= max[order[i]][j])
+				avail[j] += cur_alloc[order[i]][j];
+			else
+				return 0;
+
+	return 1;
+}
+
+
+void swap(int *x, int *y)
+{
+	int temp;
+	temp = *x;
+	*x = *y;
+	*y = temp;
+}
+// Bad time complexity ;-;
+void permute(int **max, int **alloc, int *resources, int n, int m, int *a, int l, int r)
+{
+	int i;
+	if (l == r)
+	{
+		if(checkSafety(max, alloc, resources, a, n, m))
+		{
+			for(int j = 0; j < 5; j++)
+				printf("%d", a[j]);
+			printf("\n");
+		}
+		
+		printf("\n");
+	}
+
+	else
+	{
+		for (i = l; i <= r; i++)
+		{
+			swap((a+l), (a+i));
+			permute(max, alloc, resources, n, m, a, l+1, r);
+			swap((a+l), (a+i)); //backtrack
+		}
+	}
 }
