@@ -91,7 +91,7 @@ int main()
 	// Making a temporary array
 	int a[n];
 	for(int i = 0; i < n; i++)
-		a[n] = i;
+		a[i] = i;
 
 	permute(max, alloc, resource, n, m, a, 0, n - 1);
 
@@ -127,9 +127,12 @@ int checkSafety(int **max, int **init_alloc, int *resource, int *order, int n, i
 			cur_alloc[i][j] = init_alloc[i][j];
 
 	// Calculating inital availability
+	for(int i = 0; i < m; i++)
+		avail[i] = resource[i];
+
 	for(int i = 0; i < n; i++)
 		for(int j = 0; j < m; j++)
-			avail[j] = max[i][j] - init_alloc[i][j];
+			avail[j] -= init_alloc[i][j];
 
 	// Running the safety check for the given order
 	for(int i = 0; i < n; i++)
@@ -142,7 +145,7 @@ int checkSafety(int **max, int **init_alloc, int *resource, int *order, int n, i
 	return 1;
 }
 
-
+// Function to swap integer values at a given memory location
 void swap(int *x, int *y)
 {
 	int temp;
@@ -150,6 +153,7 @@ void swap(int *x, int *y)
 	*x = *y;
 	*y = temp;
 }
+
 // Bad time complexity ;-;
 void permute(int **max, int **alloc, int *resources, int n, int m, int *a, int l, int r)
 {
@@ -162,8 +166,6 @@ void permute(int **max, int **alloc, int *resources, int n, int m, int *a, int l
 				printf("%d", a[j]);
 			printf("\n");
 		}
-		
-		printf("\n");
 	}
 
 	else
@@ -172,7 +174,7 @@ void permute(int **max, int **alloc, int *resources, int n, int m, int *a, int l
 		{
 			swap((a+l), (a+i));
 			permute(max, alloc, resources, n, m, a, l+1, r);
-			swap((a+l), (a+i)); //backtrack
+			swap((a+l), (a+i));	//backtrack
 		}
 	}
 }
