@@ -11,6 +11,7 @@ int main()
 {
 	// Funtion prototypes
 	int **getMatrix(int, int);
+	int getNumSafeSequences(int**, int**, int*, int, int, int*);
 	void sortedPermutations(int**, int**, int*, int, int, int*);
 
 	FILE *inFPtr = NULL;
@@ -27,12 +28,9 @@ int main()
 
 	fscanf(inFPtr, "%d %d", &m, &n);
 
-	printf("m = %d\nn = %d\n\n", m, n);
-
 	// Defining the matrices
 	int **alloc = getMatrix(n, m);
 	int **max = getMatrix(n, m);
-	int **need = getMatrix(n, m);
 	int *resource = (int*)malloc(m * sizeof(int));
 	int *avail = (int*)malloc(m * sizeof(int));
 
@@ -50,49 +48,13 @@ int main()
 		for(int j = 0; j < m; j++)
 			fscanf(inFPtr, "%d", &alloc[i][j]);
 
-	// calculating the need matrix
-	for(int i = 0; i < n; i++)
-		for(int j = 0; j < m; j++)
-			need[i][j] = max[i][j] - alloc[i][j];
-
-	// Printing them:
-
-	printf("resource:\n");
-	for(int i = 0; i < m; i++)
-		printf("%d ", resource[i]);
-
-	printf("\n\nmax:\n");
-	for(int i = 0; i < n; i++)
-	{
-		for(int j = 0; j < m; j++)
-			printf("%d ", max[i][j]);
-
-		printf("\n");
-	}
-
-	printf("\nalloc:\n");
-	for(int i = 0; i < n; i++)
-	{
-		for(int j = 0; j < m; j++)
-			printf("%d ", alloc[i][j]);
-
-		printf("\n");
-	}
-
-	printf("\nneed:\n");
-	for(int i = 0; i < n; i++)
-	{
-		for(int j = 0; j < m; j++)
-			printf("%d ", need[i][j]);
-
-		printf("\n");
-	}
-
 	// Making a temporary array
 	int nums[n];
 	for(int i = 0; i < n; i++)
 		nums[i] = i;
 
+	// First prints the number of sequences that have a safe execution, and then the execution order
+	printf("%d\n", getNumSafeSequences(max, alloc, resource, n, m, nums));
 	sortedPermutations(max, alloc, resource, n, m, nums);
 
 	return(0);
@@ -169,6 +131,51 @@ int findCeil(int nums[], int first, int l, int h)
 	return ceilIndex;
 }
 
+// Returns the number of sequences that have a safe exectuion
+int getNumSafeSequences(int **max, int **alloc, int *resource, int n, int m, int *nums)
+{
+	int size = n;
+	int cnt = 0;
+
+	// Sort the numbers in increasing order
+	qsort(nums, size, sizeof(nums[0]), compare);
+
+	// Print permutations one by one
+	int isFinished = 0;
+	while(!isFinished)
+	{
+		// if the permutation is a safe execution, save it
+		if(checkSafety(max, alloc, resource, nums, n, m))
+			cnt++;
+
+		// Find the rightmost number which is smaller than its next
+		// number. Let us call it 'first char'
+		int i;
+		for (i = size - 2; i >= 0; --i)
+			if (nums[i] < nums[i+1])
+				break;
+
+		// If there is no such number, all are sorted in decreasing order,
+		// means we just printed the last permutation and we are done.
+		if(i == -1)
+			isFinished = 1;
+		
+		else
+		{
+			// Find the ceil of 'first number' in right of first number.
+			// Ceil of a number is the smallest number greater than it
+			int ceilIndex = findCeil(nums, nums[i], i + 1, size - 1);
+
+			// Swap first and second numbers
+			swap(&nums[i], &nums[ceilIndex]);
+
+			// Sort the string on right of 'first number'
+			qsort(nums + i + 1, size - i - 1, sizeof(nums[0]), compare);
+		}
+	}
+	return cnt;
+}
+
 // Print all permutations of nums in sorted order
 void sortedPermutations(int **max, int **alloc, int *resource, int n, int m, int *nums)
 {
@@ -184,7 +191,6 @@ void sortedPermutations(int **max, int **alloc, int *resource, int n, int m, int
 		// if the permutation is a safe execution, save it
 		if(checkSafety(max, alloc, resource, nums, n, m))
 		{
-			printf("Safe ig: ");
 			for(int i = 0; i < size; i++)
 				printf ("%d ", nums[i]);
 			printf("\n");
