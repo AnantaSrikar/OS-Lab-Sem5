@@ -1,5 +1,5 @@
 /*
-	Program to simulate a memory system with variable size partitions
+	Program to simulate a contiguous memory system with variable size partitions
 	
 	Author: Srikar
 */
@@ -13,7 +13,7 @@
 int main(int argc, char** argv)
 {
 	// Function prototypes
-	int getRandNum(int, int);
+	int getJobSize(int);
 
 	// Initial code to get all command line values
 	
@@ -53,26 +53,29 @@ int main(int argc, char** argv)
 	// NOTE: seed it only ONCE in the code
 	srand(time(0));
 
-	printf("Random number: %d\n", getRandNum(1, 1024));
-	printf("Random number: %d\n", getRandNum(1, 100));
-	printf("Random number: %d\n", getRandNum(500, 1000));
 	
-	switch(policy)
+	for(int i = 0; i < 2000; i++)
 	{
-		case 1:
-				printf("Use best fit, lessgoo\n");
-				break;
+		int mem_size = getJobSize(profile);
 
-		case 2:
-				printf("Use worst fit, lessgoo\n");
-				break;
+		switch(policy)
+		{
+			case 1:
+					printf("Use best fit, lessgoo\n");
+					break;
 
-		case 3:
-				printf("Use first fit, lessgoo\n");
-				break;
-		
-		default:
-				printf("What did you do!? Something very bad happened!\nTerminating immediately!\n");
+			case 2:
+					printf("Use worst fit, lessgoo\n");
+					break;
+
+			case 3:
+					printf("Use first fit, lessgoo\n");
+					break;
+			
+			default:
+					printf("What did you do!? Something very bad happened!\nTerminating immediately!\n");
+					return -1;
+		}
 	}
 	
 	return(0);
@@ -81,5 +84,27 @@ int main(int argc, char** argv)
 // Function to generate random numbers in a given range
 int getRandNum(int min, int max)
 {
-	return (rand() % (max - min + 1) + 1);
+	return (rand() % (max - min + 1) + min);
+}
+
+int getJobSize(int profile)
+{
+	switch(profile)
+	{
+		case 1:
+				return getRandNum(1, 1024);
+				break;
+
+		case 2:
+				return getRandNum(1, 100);
+				break;
+
+		case 3:
+				return getRandNum(500, 1000);
+				break;
+
+		default:
+				printf("What did you do!? Something very bad happened!\nTerminating immediately!\n");
+				exit(0);
+	}
 }
