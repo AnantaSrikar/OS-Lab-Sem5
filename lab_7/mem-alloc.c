@@ -10,10 +10,15 @@
 #include<ctype.h>
 #include<time.h>
 
+#include "mem-manage/mem-manage.h"
+
 int main(int argc, char** argv)
 {
 	// Function prototypes
 	int getJobSize(int);
+	void bestFitAlloc(int, int);
+	void worstFitAlloc(int, int);
+	void firstFitAlloc(int, int);
 
 	// Initial code to get all command line values
 	
@@ -61,7 +66,7 @@ int main(int argc, char** argv)
 		switch(policy)
 		{
 			case 1:
-					printf("Use best fit, lessgoo\n");
+					bestFitAlloc(i, mem_size);
 					break;
 
 			case 2:
@@ -77,6 +82,8 @@ int main(int argc, char** argv)
 					return -1;
 		}
 	}
+
+	print();
 	
 	return(0);
 }
@@ -107,4 +114,24 @@ int getJobSize(int profile)
 				printf("What did you do!? Something very bad happened!\nTerminating immediately!\n");
 				exit(0);
 	}
+}
+
+
+void bestFitAlloc(int pid, int mem_size)
+{
+	// get all holes
+	// Check for best hole
+	// Allocate that in memory
+	// jobs_mem = (*aloc_struct)malloc(sizeof(aloc_struct));
+
+	insert(pid, 0, mem_size);
+	return;
+}
+void worstFitAlloc(int pid, int mem_size)
+{
+	return;
+}
+void firstFitAlloc(int pid, int mem_size)
+{
+	return;
 }
