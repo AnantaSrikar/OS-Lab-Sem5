@@ -7,6 +7,7 @@
 # define MAX_MEM 1024
 
 // Function prototypes
+int getRandNum(int, int);
 void allocMemoryBest(int, int);
 // void allocMemoryWorst(int, int);
 // void allocMemoryFirst(int, int);
@@ -14,12 +15,12 @@ void printMem();
 void printHoles();
 
 // Structure definitions
-struct aloc_struct
+struct jobs_struct
 {
 	int pid;
 	int beg;
 	int end;
-	struct aloc_struct *next;
+	struct jobs_struct *next;
 };
 
 struct hole_struct
@@ -29,5 +30,5 @@ struct hole_struct
 	struct hole_struct *next;
 };
 
-typedef struct aloc_struct aloc_struct;
+typedef struct jobs_struct jobs_struct;
 typedef struct hole_struct hole_struct;
