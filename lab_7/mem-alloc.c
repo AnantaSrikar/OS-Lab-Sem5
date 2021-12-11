@@ -66,7 +66,6 @@ int main(int argc, char** argv)
 		switch(policy)
 		{
 			case 1:
-					// bestFitAlloc(i, mem_size);
 					allocMemoryBest(i, mem_size);
 					break;
 
@@ -84,7 +83,8 @@ int main(int argc, char** argv)
 		}
 	}
 
-	print();
+	printMem();
+	printHoles();
 	
 	return(0);
 }

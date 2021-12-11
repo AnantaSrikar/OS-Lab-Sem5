@@ -8,8 +8,10 @@
 
 // Function prototypes
 void allocMemoryBest(int, int);
-void delete(int);
-void print();
+// void allocMemoryWorst(int, int);
+// void allocMemoryFirst(int, int);
+void printMem();
+void printHoles();
 
 // Structure definitions
 struct aloc_struct
