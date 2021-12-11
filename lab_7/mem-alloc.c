@@ -66,7 +66,8 @@ int main(int argc, char** argv)
 		switch(policy)
 		{
 			case 1:
-					bestFitAlloc(i, mem_size);
+					// bestFitAlloc(i, mem_size);
+					allocMemoryBest(i, mem_size);
 					break;
 
 			case 2:
@@ -114,24 +115,4 @@ int getJobSize(int profile)
 				printf("What did you do!? Something very bad happened!\nTerminating immediately!\n");
 				exit(0);
 	}
-}
-
-
-void bestFitAlloc(int pid, int mem_size)
-{
-	// get all holes
-	// Check for best hole
-	// Allocate that in memory
-	// jobs_mem = (*aloc_struct)malloc(sizeof(aloc_struct));
-
-	insert(pid, 0, mem_size);
-	return;
-}
-void worstFitAlloc(int pid, int mem_size)
-{
-	return;
-}
-void firstFitAlloc(int pid, int mem_size)
-{
-	return;
 }

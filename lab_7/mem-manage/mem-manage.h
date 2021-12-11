@@ -4,9 +4,11 @@
 	Author: Ananta Srikar
 */
 
+# define MAX_MEM 1024
+
 // Function prototypes
-void insert(int pid, int beg, int end);
-void delete(int pid);
+void allocMemoryBest(int, int);
+void delete(int);
 void print();
 
 // Structure definitions
