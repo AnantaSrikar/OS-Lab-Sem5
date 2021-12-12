@@ -9,6 +9,8 @@
 
 #include "mem-manage.h"
 
+void printHoles();
+
 // Linked list to store all the current memory allocations
 jobs_struct *jobs_mems = NULL;
 hole_struct *holes_mem = NULL;
@@ -77,32 +79,90 @@ void deleteHole(hole_struct *hole)
 // To ensure we don't partition the holes accidentally
 void normalizeHoles()
 {
+	// TODO: Fix logic, not working
 	hole_struct *t1 = holes_mem;
 	hole_struct *t2;
 
+	printf("DEBUG: Before normalizing:\n");
+	printHoles();
+
+	// TODO normalize last and first hole
 	while(t1 -> next != NULL)
 	{
-		t2 = t1 -> next;
+		printf("DEBUG: t1 -> beg: %d, t1 -> end: %d\n", t1 -> beg, t1 -> end);
+		t2 = holes_mem;
 
 		while(t2 != NULL)
 		{
+			printf("DEBUG: t2 -> beg: %d, t2 -> end: %d\n", t2 -> beg, t2 -> end);
+			if(t2 == t1)
+			{
+				printf("DEBUG: Skipping comparing the same node\n");
+				t2 = t2 -> next;
+				continue;
+			}
+
 			if(t1 -> end == t2 -> beg - 1)
 			{
+				printf("Found, normalizing!\n");
 				insertHole(t1 -> beg, t2 -> end);
-				
 				hole_struct *temp1 = t1;
 				hole_struct *temp2 = t2;
 				t1 = t1 -> next;
 				t2 = t2 -> next;
 				deleteHole(temp1);
 				deleteHole(temp2);
-				break;
+				// break;
 			}
+
+			else if(t2 -> end == t1 -> beg - 1)
+			{
+				printf("Found, normalizing!\n");
+				insertHole(t2 -> beg, t1 -> end);
+				hole_struct *temp1 = t2;
+				hole_struct *temp2 = t1;
+				t2 = t2 -> next;
+				t1 = t1 -> next;
+				deleteHole(temp1);
+				deleteHole(temp2);
+				// break;
+			}
+
 			t2 = t2 -> next;
 		}
 
 		t1 = t1 -> next;
 	}
+
+	// Checking last and first hole
+	// t2 = holes_mem;
+	// printf("DEBUG: t1 -> beg: %d, t1 -> end: %d\n", t1 -> beg, t1 -> end);
+	// if(t2 -> end == t1 -> beg - 1)
+	// {
+	// 	printf("Found, normalizing!\n");
+	// 	insertHole(t1 -> beg, t2 -> end);
+	// 	hole_struct *temp1 = t1;
+	// 	hole_struct *temp2 = t2;
+	// 	t1 = t1 -> next;
+	// 	t2 = t2 -> next;
+	// 	deleteHole(temp1);
+	// 	deleteHole(temp2);
+	// }2 = holes_mem;
+	// printf("DEBUG: t1 -> beg: %d, t1 -> end: %d\n", t1 -> beg, t1 -> end);
+	// if(t2 -> end == t1 -> beg - 1)
+	// {
+	// 	printf("Found, normalizing!\n");
+	// 	insertHole(t1 -> beg, t2 -> end);
+	// 	hole_struct *temp1 = t1;
+	// 	hole_struct *temp2 = t2;
+	// 	t1 = t1 -> next;
+	// 	t2 = t2 -> next;
+	// 	deleteHole(temp1);
+	// 	deleteHole(temp2);
+	// }
+	
+	printf("DEBUG: Normalized holes:\n");
+	printHoles();
 }
 
 int getMemSize(jobs_struct *mem)
@@ -181,14 +241,44 @@ void deleteProcess(jobs_struct *job)
 	}
 }
 
+// THE BUG IS SOMEWHERE IN THIS FUNCTION
 void deleteRandomJob()
 {
+	printf("DUBUG: Entering deleteRandomJob\n");
+	if(getNumJobs() < 2)
+	{
+		printf("DEBUG: No of jobs is 1, deleting the only node:\n");
+		printf("DEBUG: delete node with pid: %d, beg	: %d, end: %d\n", jobs_mems -> pid, jobs_mems -> beg, jobs_mems -> end);
+		insertHole(jobs_mems -> beg, jobs_mems -> end);
+		normalizeHoles();
+		deleteProcess(jobs_mems);
+		return;
+	}
+
 	int proc_list = getRandNum(1, getNumJobs());
 	jobs_struct *temp = jobs_mems;
 
-	for(int i = 0; i < proc_list; i++)
+	printf("DEBUG: NumJobs = %d, proc_list: %d\n", getNumJobs(), proc_list);
+
+	for(int i = 0; i < proc_list - 1; i++)
+		printf("Test iter: %d\n", i);
+
+	for(int i = 0; i < proc_list - 1; i++)
+	{
+		printf("\tLoop iter: %d\n", i);
 		temp = temp -> next;
+	}
+
+	printf("DEBUG: Finished loop!\n");
+	printf("DEBUG: delete node with pid: %d, beg: %d, end: %d\n", temp -> pid, temp -> beg, temp -> end);
 	
+	if(temp == NULL)
+	{
+		printf("Something bad happened, temp is NULL!\n");
+		return;
+	}
+	
+	// TODO: insert hole is causing bug
 	insertHole(temp -> beg, temp -> end);
 	normalizeHoles();
 	deleteProcess(temp);
@@ -215,12 +305,13 @@ hole_struct *getHole(int mem_size)
 
 void allocMemoryBest(int pid, int mem_size)
 {
-	printf("Mem size: %d, ", mem_size);
+	printf("DEBUB: Recieved Mem size: %d\n", mem_size);
 	// The whole memory is a hole initially
 	if(jobs_mems == NULL)
 	{
 		insertIntoMem(pid, 0, mem_size - 1);
 		insertHole(mem_size, MAX_MEM - 1);
+		printf("\n");
 	}
 	
 	else
@@ -230,8 +321,17 @@ void allocMemoryBest(int pid, int mem_size)
 
 		while(best_hole == NULL)
 		{
-			deleteRandomJob();
+			printf("\nDEBUG: Inside while\n");
 			best_hole = getHole(mem_size);
+
+			// if(best_hole == NULL)
+			// 	break;
+			
+			if(best_hole == NULL)
+			{
+				printf("DEBUG: Got NULL hole, deleting random job\n");
+				deleteRandomJob();
+			}
 		}
 
 		// if no hole that is big enough is present
